@@ -11,15 +11,15 @@ CREATE TABLE rangers (
     region VARCHAR(100) NOT NULL
 )
 
+
+
 -- create species table
 CREATE TABLE species (
     species_id SERIAL PRIMARY KEY,
     common_name VARCHAR(100) NOT NULL,
     scientific_name VARCHAR(150) NOT NULL,
     discovery_date DATE NOT NULL,
-    conservation_status VARCHAR(50) CHECK (
-        conservation_status IN ('Endangered', 'Vulnerable')
-    )
+    conservation_status VARCHAR(50) NOT NULL
 )
 
 
@@ -122,20 +122,22 @@ VALUES (
 
 SELECT * FROM sightings;
 
--- 1️⃣ Register a new ranger with provided data with name = 'Derek Fox' and region = 'Coastal Plains'
+
+-- all problem solve
+-- problem -01
 
 INSERT INTO
     rangers (name, region)
 VALUES ('Derek Fox', 'Coastal Plains');
 
--- 2️⃣ Count unique species ever sighted.
+-- problem -02
 SELECT COUNT(DISTINCT species_id) AS unique_species_count
 FROM sightings;
 
--- 3️⃣ Find all sightings where the location includes "Pass".
+-- problem -03
 SELECT * FROM sightings WHERE location ILIKE '%Pass%';
 
--- 4️⃣ List each ranger's name and their total number of sightings.
+-- problem -04
 SELECT r.name, COUNT(s.sighting_id) AS total_sightings
 FROM rangers r
     LEFT JOIN sightings s ON r.ranger_id = s.ranger_id
@@ -145,7 +147,7 @@ ORDER BY
     r.name ASC;
 
 
--- 5️⃣ List species that have never been sighted.
+-- problem -05
 SELECT common_name
 FROM species
 WHERE species_id NOT IN (
@@ -155,7 +157,7 @@ WHERE species_id NOT IN (
 
 
 
--- 6️⃣ Show the most recent 2 sightings.
+-- problem -06
 SELECT sp.common_name, s.sighting_time, r.name
 FROM sightings s
 JOIN species sp ON s.species_id = sp.species_id
@@ -163,29 +165,14 @@ JOIN rangers r ON s.ranger_id = r.ranger_id
 ORDER BY s.sighting_time DESC
 LIMIT 2;
 
--- 7️⃣ Update all species discovered before year 1800 to have status 'Historic'.
+-- problem -07
 UPDATE species
 SET conservation_status = 'Historic'
 WHERE discovery_date < '1800-01-01';
 
-SELECT conname
-FROM pg_constraint
-WHERE conrelid = 'species'::regclass AND contype = 'c';
 
 
-ALTER TABLE species
-DROP CONSTRAINT species_conservation_status_check;
-
-
-ALTER TABLE species
-ADD CONSTRAINT species_conservation_status_check
-CHECK (
-    conservation_status IN ('Endangered', 'Vulnerable', 'Historic')
-);
-
-
-
--- 8️⃣ Label each sighting's time of day as 'Morning', 'Afternoon', or 'Evening'.
+-- problem -08
 
 SELECT
     sighting_id,
@@ -196,7 +183,7 @@ SELECT
     END AS time_of_day
 FROM sightings;
 
--- 9️⃣ Delete rangers who have never sighted any species
+-- problem -09
 DELETE FROM rangers
 WHERE ranger_id NOT IN (
     SELECT DISTINCT ranger_id FROM sightings
